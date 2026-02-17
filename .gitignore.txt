@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+venv/
+env/
+.env
+
+# Model (optional - large file)
+# model.pkl
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+
+# OS
+.DS_Store
+Thumbs.db
