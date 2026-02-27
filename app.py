@@ -24,20 +24,25 @@ def predict():
         weight    = float(data["weight"])
         ap_hi     = float(data["ap_hi"])
         ap_lo     = float(data["ap_lo"])
+        smoke     = float(data.get("smoke", 0))
+        alco      = float(data.get("alco", 0))
 
         # Derived features
         age_days       = age_years * 365
         bmi            = weight / ((height / 100) ** 2)
         pulse_pressure = ap_hi - ap_lo
 
-        # Default values for lifestyle features
-        cholesterol = 1.0
-        gluc        = 1.0
-        smoke       = 0.0
-        alco        = 0.0
-        active      = 1.0
+        # Cholesterol and glucose based on blood pressure
+        if ap_hi <= 120 and ap_lo <= 80:
+            cholesterol = 1.0
+            gluc        = 1.0
+            active      = 1.0
+        else:
+            cholesterol = 2.0
+            gluc        = 2.0
+            active      = 0.0
 
-        # Final 14 features — same order as model was trained
+        # Final 14 features in exact order
         features = np.array([[
             age_days,
             gender,
@@ -55,13 +60,17 @@ def predict():
             age_years
         ]])
 
-        prediction = model.predict(features)
+        # Get prediction and probability
+        prediction = model.predict(features)[0]
+        probability = model.predict_proba(features)[0]
 
-        result = "High Risk" if prediction[0] == 1 else "Low Risk"
+        result = "High Risk" if prediction == 1 else "Low Risk"
+        confidence = int(probability[1] * 100)
 
         return jsonify({
             "success": True,
-            "prediction": result
+            "prediction": result,
+            "confidence": confidence
         })
 
     except Exception as e:
